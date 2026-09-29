@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Grammar Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f1117;--surface:#181c27;--surface2:#1f2436;--border:#2c3350;
+    --text:#e8eaf2;--muted:#7880a0;--accent:#5b8dee;
+    --green:#3ecf8e;--red:#f06070;--yellow:#f5c842;--radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 16px 60px}
+  .quiz-header{width:100%;max-width:700px;padding:48px 0 32px;text-align:center}
+  .quiz-header .label{font-size:.72rem;font-weight:600;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:12px}
+  .quiz-header h1{font-family:'Playfair Display',serif;font-size:2.4rem;line-height:1.15;color:var(--text);margin-bottom:10px}
+  .quiz-header p{font-size:.9rem;color:var(--muted);line-height:1.6}
+  .progress-wrap{width:100%;max-width:700px;margin-bottom:28px}
+  .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:8px;font-weight:500}
+  .progress-bar{height:4px;background:var(--surface2);border-radius:4px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .4s ease}
+  .score-strip{display:flex;gap:20px;justify-content:center;margin-bottom:28px}
+  .score-chip{background:var(--surface);border:1px solid var(--border);border-radius:30px;padding:6px 18px;font-size:.78rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .score-chip .dot{width:7px;height:7px;border-radius:50%}
+  .dot-green{background:var(--green)}.dot-red{background:var(--red)}
+  .card{width:100%;max-width:700px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;margin-bottom:16px}
+  .section-tag{font-size:.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .q-number{font-size:.78rem;color:var(--muted);margin-bottom:6px;font-weight:500}
+  .q-text{font-size:1.2rem;font-weight:600;line-height:1.5;color:var(--text);margin-bottom:26px}
+  .q-text .blank{display:inline-block;border-bottom:2px solid var(--accent);min-width:60px;color:var(--accent);padding:0 4px}
+  .options{display:flex;flex-direction:column;gap:10px}
+  .option-btn{display:flex;align-items:center;gap:14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:13px 18px;cursor:pointer;transition:all .18s;text-align:left;color:var(--text);font-family:'Inter',sans-serif;font-size:.92rem;font-weight:500;width:100%}
+  .option-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(91,141,238,0.08)}
+  .option-btn:disabled{cursor:default}
+  .option-btn .opt-letter{width:28px;height:28px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;transition:all .18s}
+  .option-btn.correct{border-color:var(--green);background:rgba(62,207,142,0.08)}
+  .option-btn.correct .opt-letter{background:var(--green);color:#0f1117}
+  .option-btn.wrong{border-color:var(--red);background:rgba(240,96,112,0.06);opacity:.6}
+  .option-btn.wrong .opt-letter{background:var(--red);color:#fff}
+  .option-btn.reveal{border-color:var(--green);background:rgba(62,207,142,0.1);animation:pulse .4s ease}
+  .option-btn.reveal .opt-letter{background:var(--green);color:#0f1117}
+  @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+  .feedback{display:none;margin-top:14px;border-radius:10px;padding:14px 16px;font-size:.86rem;line-height:1.75;animation:fadeIn .25s ease}
+  .feedback.show{display:block}
+  .feedback.fb-correct{background:rgba(62,207,142,0.08);border:1px solid rgba(62,207,142,0.3);color:#8de8c0}
+  .feedback.fb-wrong{background:rgba(240,96,112,0.07);border:1px solid rgba(240,96,112,0.25);color:#f0b0b8}
+  .feedback.fb-reveal{background:rgba(62,207,142,0.08);border:1px solid rgba(62,207,142,0.3);color:#8de8c0}
+  .feedback strong{color:#fff}
+  .feedback .why{margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);color:var(--muted);font-size:.82rem}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+  .btn-next{display:none;width:100%;max-width:700px;padding:15px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:'Inter',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;margin-bottom:16px;transition:opacity .2s;letter-spacing:.3px}
+  .btn-next:hover{opacity:.88}
+  .btn-next.show{display:block}
+  .passage{background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:18px 20px;margin-bottom:24px;font-size:.88rem;line-height:1.85;color:#b8bdd8}
+  .passage h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);margin-bottom:10px}
+  .results-card{display:none;width:100%;max-width:700px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:40px 32px;text-align:center}
+  .results-card.show{display:block;animation:fadeIn .4s ease}
+  .results-emoji{font-size:3rem;margin-bottom:16px}
+  .results-card h2{font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:8px}
+  .results-card p{color:var(--muted);font-size:.9rem;margin-bottom:28px}
+  .score-big{font-family:'Playfair Display',serif;font-size:4rem;font-weight:700;color:var(--accent);line-height:1;margin-bottom:6px}
+  .score-label{font-size:.8rem;color:var(--muted);margin-bottom:28px}
+  .stats-row{display:flex;justify-content:center;gap:24px;margin-bottom:32px}
+  .stat{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 24px;text-align:center}
+  .stat-val{font-size:1.5rem;font-weight:700;margin-bottom:2px}
+  .stat-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .stat-val.g{color:var(--green)}.stat-val.r{color:var(--red)}
+  .btn-restart{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:13px 36px;font-family:'Inter',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;transition:opacity .2s}
+  .btn-restart:hover{opacity:.88}
+  @media(max-width:500px){.quiz-header h1{font-size:1.7rem}.card{padding:22px 18px}.q-text{font-size:1rem}.stats-row{gap:12px}.stat{padding:12px 16px}}
+</style>
+</head>
+<body>
+
+<div class="quiz-header">
+  <div class="label">English Practice</div>
+  <h1>Grammar &amp; Comprehension Quiz</h1>
+  <p>Choose the correct answer. If you pick a wrong one, you'll see exactly why — and you can keep trying.</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-info"><span id="prog-text">Question 1 of 25</span><span id="prog-pct">0%</span></div>
+  <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<div class="score-strip">
+  <div class="score-chip"><span class="dot dot-green"></span><span id="correct-count">0</span> Correct</div>
+  <div class="score-chip"><span class="dot dot-red"></span><span id="wrong-count">0</span> Wrong</div>
+</div>
+
+<div id="question-area"></div>
+<button class="btn-next" id="btn-next" onclick="nextQuestion()">Next question →</button>
+<div class="results-card" id="results"></div>
+
+<script>
+const SECTIONS={1:"Subject — Verb Agreement",6:"Prepositions, Frequency & Quantities",12:"Present Simple vs Present Continuous",16:"Conversation — Choose the Right Response",22:"Reading Comprehension"};
+
+const PASSAGE=`<div class="passage"><h3>A new job</h3>Laura works at a small clothing store. She usually starts work at nine in the morning. She helps customers, organizes the clothes and prepares the window displays. Today, the store is very busy because there is a special sale. Laura is helping a customer choose a blue dress. She likes her job because she enjoys fashion and meeting new people.</div>`;
+
+const QUESTIONS=[
+  {id:1,q:"I ___ from Colombia.",opts:["is","am","are","be"],ans:1,
+   why:"With <strong>I</strong>, we always use <strong>am</strong>.",
+   wrongExp:{0:"<strong>\"is\"</strong> is used with he, she, it, or singular nouns — not with I. Example: She <u>is</u> from Colombia.",2:"<strong>\"are\"</strong> is used with you, we, or they — not with I. Example: They <u>are</u> from Colombia.",3:"<strong>\"be\"</strong> is the base (infinitive) form. In a sentence you must conjugate it: I <u>am</u>, you <u>are</u>, he <u>is</u>."}},
+  {id:2,q:"She ___ English every Monday.",opts:["study","studying","studies","studied"],ans:2,
+   why:"In present simple with <strong>she / he / it</strong>, we add <strong>-s</strong> or <strong>-es</strong> to the verb.",
+   wrongExp:{0:"<strong>\"study\"</strong> is the base form. With she/he/it you must change <em>y → ies</em>: study → <u>studies</u>.",1:"<strong>\"studying\"</strong> is present continuous, for actions happening right now. \"Every Monday\" signals a habit → use present simple.",3:"<strong>\"studied\"</strong> is past simple. \"Every Monday\" tells us this is a current routine, not something that happened in the past."}},
+  {id:3,q:"___ you like coffee?",opts:["Are","Does","Do","Is"],ans:2,
+   why:"To ask about likes with <strong>you</strong>, we use <strong>Do you like…?</strong>",
+   wrongExp:{0:"<strong>\"Are\"</strong> is for the verb <em>to be</em>: Are you tired? — not for action verbs like <em>like</em>. With you + action verb, use <strong>Do</strong>.",1:"<strong>\"Does\"</strong> is used with he, she, or it — not with you. Example: Does she like coffee?",3:"<strong>\"Is\"</strong> belongs to the verb <em>to be</em> with he/she/it. It cannot start a question about liking something with <strong>you</strong>."}},
+  {id:4,q:"My brother ___ work on Sundays.",opts:["don't","doesn't","isn't","not"],ans:1,
+   why:"With <strong>he / she / it</strong>, the negative is <strong>doesn't</strong> + base verb (no -s).",
+   wrongExp:{0:"<strong>\"don't\"</strong> is used with I, you, we, they. My brother = he → we need <strong>doesn't</strong>.",2:"<strong>\"isn't\"</strong> negates the verb <em>to be</em>. Here we are negating the action verb <em>work</em> → use <strong>doesn't</strong>.",3:"<strong>\"not\"</strong> alone cannot make a negative. You always need an auxiliary: he does<u>n't</u> work — never <em>he not work</em>."}},
+  {id:5,q:"They ___ very tired today.",opts:["am","is","are","be"],ans:2,
+   why:"With <strong>they</strong>, we always use <strong>are</strong>.",
+   wrongExp:{0:"<strong>\"am\"</strong> is only used with <strong>I</strong>. Example: I <u>am</u> tired.",1:"<strong>\"is\"</strong> is for he, she, it, or singular nouns. <strong>They</strong> is plural → use <strong>are</strong>.",3:"<strong>\"be\"</strong> is the infinitive. In a sentence it must be conjugated: they <u>are</u>, not they be."}},
+  {id:6,q:"My English class starts ___ 7:00.",opts:["in","on","at","from"],ans:2,
+   why:"We use <strong>at</strong> with specific clock times.",
+   wrongExp:{0:"<strong>\"in\"</strong> is used with months, years, and parts of the day: in January, in the morning — not with clock times.",1:"<strong>\"on\"</strong> is used with days and dates: on Monday, on March 5th — not with clock times.",3:"<strong>\"from\"</strong> marks the start of a range: from 7:00 <u>to</u> 9:00. It cannot replace <strong>at</strong> before a single time."}},
+  {id:7,q:"I usually visit my family ___ Sundays.",opts:["at","on","in","to"],ans:1,
+   why:"We use <strong>on</strong> with days of the week.",
+   wrongExp:{0:"<strong>\"at\"</strong> is for specific times (at 7:00, at noon, at night) — not for days of the week.",2:"<strong>\"in\"</strong> is for months, years, and parts of the day: in April, in the morning — not for days.",3:"<strong>\"to\"</strong> expresses direction or movement: I go <u>to</u> school. It is never used before days."}},
+  {id:8,q:"We exercise ___ the morning.",opts:["in","on","at","for"],ans:0,
+   why:"We say <strong>in the morning</strong> and <strong>in the afternoon</strong>. The exception is <strong>at night</strong>.",
+   wrongExp:{1:"<strong>\"on\"</strong> is used with specific days: on Monday, on the weekend — not with parts of the day.",2:"<strong>\"at\"</strong> is for specific times (at 8:00) and one exception: <u>at night</u>. For morning and afternoon, use <strong>in</strong>.",3:"<strong>\"for\"</strong> expresses duration: I exercise <u>for</u> one hour — not to introduce a part of the day."}},
+  {id:9,q:"There ___ two supermarkets near my house.",opts:["is","are","am","be"],ans:1,
+   why:"We use <strong>there are</strong> when talking about more than one thing.",
+   wrongExp:{0:"<strong>\"is\"</strong> is for singular nouns: There <u>is</u> one supermarket. Since we have <strong>two</strong>, we need the plural form <strong>are</strong>.",2:"<strong>\"am\"</strong> is only used with <strong>I</strong> and never appears in the <em>there is / there are</em> structure.",3:"<strong>\"be\"</strong> is the base form. The correct structures are <strong>there is</strong> (singular) and <strong>there are</strong> (plural)."}},
+  {id:10,q:"I don't have ___ milk.",opts:["some","any","a","many"],ans:1,
+   why:"We use <strong>any</strong> in negative sentences and questions.",
+   wrongExp:{0:"<strong>\"some\"</strong> is for affirmative sentences (I have <u>some</u> milk) and polite offers. In negatives, use <strong>any</strong>.",2:"<strong>\"a\"</strong> is used with singular countable nouns (a bottle). <strong>Milk</strong> is uncountable — we cannot use <strong>a</strong> before it.",3:"<strong>\"many\"</strong> is used with countable plural nouns: I don't have <u>many</u> glasses. <strong>Milk</strong> is uncountable → use <strong>any</strong>."}},
+  {id:11,q:"I ___ go to the cinema. Maybe once or twice a month.",opts:["always","never","sometimes","every"],ans:2,
+   why:"\"Once or twice a month\" means it happens occasionally — that is <strong>sometimes</strong>.",
+   wrongExp:{0:"<strong>\"always\"</strong> means 100% of the time. Going once or twice a month is not always — it happens occasionally.",1:"<strong>\"never\"</strong> means 0% of the time. But the person <em>does</em> go — sometimes. Never would be incorrect here.",3:"<strong>\"every\"</strong> needs a noun to follow it: every day, every week. It cannot replace a frequency adverb like <strong>sometimes</strong>."}},
+  {id:12,q:"Look! The baby ___.",opts:["sleeps","is sleeping","sleep","sleeping"],ans:1,
+   why:"<strong>Look!</strong> signals the action is happening right now → present continuous.",
+   wrongExp:{0:"<strong>\"sleeps\"</strong> is present simple, used for habits. <strong>Look!</strong> signals something is happening at this moment → present continuous.",2:"<strong>\"sleep\"</strong> is the base form. Even in present simple, with he/she/it you'd need <em>sleeps</em>. But here we need present continuous: <em>is sleeping</em>.",3:"<strong>\"sleeping\"</strong> is just the -ing form. A complete present continuous sentence needs the auxiliary <strong>is</strong>: the baby <u>is sleeping</u>."}},
+  {id:13,q:"Emma usually ___ jeans to work.",opts:["wear","is wearing","wears","wearing"],ans:2,
+   why:"<strong>Usually</strong> signals a habit. Emma = she → present simple with -s: <strong>wears</strong>.",
+   wrongExp:{0:"<strong>\"wear\"</strong> is the base form. In present simple with she/he/it, you must add <strong>-s</strong>: <u>wears</u>.",1:"<strong>\"is wearing\"</strong> is present continuous, for actions happening right now. <strong>Usually</strong> signals a habit → use present simple.",3:"<strong>\"wearing\"</strong> is only the -ing form — it needs an auxiliary: she <u>is wearing</u>. But <strong>usually</strong> tells us it's a routine → <em>wears</em>."}},
+  {id:14,q:"Today, Emma ___ a black dress.",opts:["wears","is wearing","wear","wearing"],ans:1,
+   why:"<strong>Today</strong> describes what Emma is wearing at this specific moment → present continuous.",
+   wrongExp:{0:"<strong>\"wears\"</strong> is present simple for habits. <strong>Today</strong> tells us this is happening right now, not a regular habit → use present continuous.",2:"<strong>\"wear\"</strong> is the base form. Even in present simple with she, you'd need <em>wears</em>. But <strong>today</strong> signals now → <em>is wearing</em>.",3:"<strong>\"wearing\"</strong> alone is incomplete. It needs the auxiliary: Emma <u>is wearing</u> a black dress."}},
+  {id:15,q:"What ___ you doing right now?",opts:["do","does","are","is"],ans:2,
+   why:"The correct structure for present continuous questions with <strong>you</strong> is <strong>What are you doing?</strong>",
+   wrongExp:{0:"<strong>\"do\"</strong> is the auxiliary for present simple questions: Do you like coffee? For present continuous with <strong>you</strong>, use <strong>are</strong>.",1:"<strong>\"does\"</strong> is for he, she, it in present simple. With <strong>you</strong> and present continuous, use <strong>are</strong>.",3:"<strong>\"is\"</strong> would be correct with he/she/it: What <u>is</u> she doing? With <strong>you</strong>, use <strong>are</strong>."}},
+  {id:16,q:"How often do you exercise?",opts:["At the gym.","Twice a week.","For one hour.","With my sister."],ans:1,
+   why:"<strong>How often</strong> asks about frequency. Only 'Twice a week' gives a frequency answer.",
+   wrongExp:{0:"<strong>\"At the gym\"</strong> answers <em>Where?</em> — not <em>How often?</em>. It tells us the place, not the frequency.",2:"<strong>\"For one hour\"</strong> answers <em>How long?</em> — the duration, not how frequently. Use words like daily, twice a week, etc. for frequency.",3:"<strong>\"With my sister\"</strong> answers <em>With whom?</em> — not <em>How often?</em>. It tells us who she exercises with, not the frequency."}},
+  {id:17,q:"Would you like some coffee?",opts:["Yes, please.","Yes, I like.","At eight o'clock.","It is coffee."],ans:0,
+   why:"<strong>Yes, please.</strong> is the natural, polite response when someone offers something.",
+   wrongExp:{1:"<strong>\"Yes, I like\"</strong> is grammatically incorrect — you can't end the sentence there. A correct version would be <em>Yes, I'd like some</em>, but the simplest and most natural reply is <strong>Yes, please.</strong>",2:"<strong>\"At eight o'clock\"</strong> answers <em>When?</em> — a time question. It has nothing to do with accepting or refusing an offer.",3:"<strong>\"It is coffee\"</strong> simply restates what was offered. It doesn't make sense as a reply to a question."}},
+  {id:18,q:"Can I help you?",opts:["I can swim.","Yes, I'm looking for a jacket.","I helped yesterday.","No, you can."],ans:1,
+   why:"This is a typical shop phrase. The natural reply is <strong>Yes, I'm looking for…</strong>",
+   wrongExp:{0:"<strong>\"I can swim\"</strong> uses <em>can</em> but refers to a personal ability — completely unrelated to responding to being offered help.",2:"<strong>\"I helped yesterday\"</strong> is past tense and changes the subject. It doesn't respond to the offer of help.",3:"<strong>\"No, you can\"</strong> is a contradiction — it says no but then says the person can. The negative would be <em>No, you can't</em>, but that's also not a natural or polite reply here."}},
+  {id:19,q:"Where is the bank?",opts:["It opens at nine.","I need some money.","It's next to the supermarket.","Yes, there is."],ans:2,
+   why:"<strong>Where</strong> asks for a location. Only option C gives a location as an answer.",
+   wrongExp:{0:"<strong>\"It opens at nine\"</strong> answers <em>When?</em> — the opening time of the bank. It doesn't tell us where the bank is.",1:"<strong>\"I need some money\"</strong> is a personal statement completely unrelated to answering a <em>where</em> question.",3:"<strong>\"Yes, there is\"</strong> answers a yes/no question like <em>Is there a bank near here?</em> — not a <em>where</em> question."}},
+  {id:20,q:"Shall we watch a movie tonight?",opts:["That sounds great.","I watched it yesterday.","It is on the table.","At the cinema yesterday."],ans:0,
+   why:"<strong>Shall we…?</strong> is a suggestion. The natural response to accepting is <strong>That sounds great.</strong>",
+   wrongExp:{1:"<strong>\"I watched it yesterday\"</strong> is past tense and changes the topic entirely. It doesn't respond to the suggestion of watching something together tonight.",2:"<strong>\"It is on the table\"</strong> describes the location of an object — completely unrelated to a suggestion about watching a movie.",3:"<strong>\"At the cinema yesterday\"</strong> is a time/place phrase with no verb. It also refers to the past, not to the proposal being made now."}},
+  {id:21,q:"I'm sorry I'm late.",opts:["You're welcome.","That's okay.","Here you are.","Nice to meet you."],ans:1,
+   why:"<strong>That's okay.</strong> is the natural, friendly response to an apology.",
+   wrongExp:{0:"<strong>\"You're welcome\"</strong> is a response to <em>thank you</em> — not to an apology. These are two different social exchanges.",2:"<strong>\"Here you are\"</strong> is used when handing something to someone. It has no relation to responding to an apology.",3:"<strong>\"Nice to meet you\"</strong> is said when meeting someone for the first time — not when someone apologizes for being late."}},
+  {id:22,q:"Where does Laura work?",opts:["At a supermarket.","At a clothing store.","At a restaurant.","At a school."],ans:1,passage:true,
+   why:"The first sentence of the text clearly states: <em>\"Laura works at a small clothing store.\"</em>",
+   wrongExp:{0:"A supermarket <em>is</em> mentioned in the passage, but as a nearby location — not Laura's workplace. Read the first sentence carefully.",2:"The passage never mentions a restaurant. This option has no support in the text.",3:"There is no mention of a school anywhere in the passage. Laura's workplace is clearly given in the very first sentence."}},
+  {id:23,q:"What time does she usually start work?",opts:["At eight.","At nine.","At ten.","At noon."],ans:1,passage:true,
+   why:"The text says: <em>\"She usually starts work at nine in the morning.\"</em>",
+   wrongExp:{0:"Eight is not mentioned in the passage. The exact time given is <strong>nine</strong> in the morning — read carefully.",2:"Ten is not mentioned in the passage. The text clearly states she starts at <strong>nine</strong>.",3:"Noon is not mentioned anywhere. The passage gives a specific time: <strong>nine in the morning</strong>."}},
+  {id:24,q:"Why is the store busy today?",opts:["Because there is a special sale.","Because Laura is late.","Because it is closing.","Because there are no customers."],ans:0,passage:true,
+   why:"The text says: <em>\"the store is very busy because there is a special sale.\"</em>",
+   wrongExp:{1:"The passage does not say Laura is late. She is actively working and helping a customer — there is no mention of her arriving late.",2:"The store is busy and open — nothing in the text suggests it is closing. This is the opposite of what is described.",3:"This is completely opposite to what the text says. The store is busy <em>because</em> there are many customers, attracted by the special sale."}},
+  {id:25,q:"Why does Laura like her job?",opts:["Because the store is small.","Because she works alone.","Because she enjoys fashion and meeting people.","Because she finishes early."],ans:2,passage:true,
+   why:"The text says: <em>\"She likes her job because she enjoys fashion and meeting new people.\"</em>",
+   wrongExp:{0:"The passage does mention the store is small, but that is not given as the reason Laura likes her job. Read the last sentence carefully.",1:"The passage never says Laura works alone. In fact, she <em>helps customers</em> — she clearly interacts with people.",3:"The passage never mentions what time Laura finishes. This detail simply does not exist in the text."}}
+];
+
+let current=0,correct=0,wrong=0,answered=false,wrongAnswers=new Set();
+
+function getSectionLabel(id){
+  let label='';
+  for(const[start,name]of Object.entries(SECTIONS)){if(id>=parseInt(start))label=name;}
+  return label;
+}
+
+function renderQuestion(){
+  if(current>=QUESTIONS.length){showResults();return;}
+  const q=QUESTIONS[current];
+  answered=false; wrongAnswers=new Set();
+  const pct=Math.round((current/QUESTIONS.length)*100);
+  document.getElementById('prog-text').textContent=`Question ${current+1} of ${QUESTIONS.length}`;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('correct-count').textContent=correct;
+  document.getElementById('wrong-count').textContent=wrong;
+  document.getElementById('btn-next').classList.remove('show');
+  const letters=['A','B','C','D'];
+  const passageHtml=q.passage?PASSAGE:'';
+  const optsHtml=q.opts.map((o,i)=>
+    `<button class="option-btn" id="opt-${i}" onclick="selectOption(${i})">
+      <span class="opt-letter">${letters[i]}</span><span>${o}</span>
+    </button>`).join('');
+  document.getElementById('question-area').innerHTML=`
+    <div class="card">
+      <div class="section-tag">${getSectionLabel(q.id)}</div>
+      <div class="q-number">Question ${current+1}</div>
+      ${passageHtml}
+      <div class="q-text">${q.q.replace('___','<span class="blank">___</span>')}</div>
+      <div class="options" id="options">${optsHtml}</div>
+      <div class="feedback" id="feedback"></div>
+    </div>`;
+}
+
+function selectOption(idx){
+  if(answered)return;
+  const q=QUESTIONS[current];
+  const letters=['A','B','C','D'];
+  if(idx===q.ans){
+    answered=true;
+    document.getElementById(`opt-${idx}`).classList.add('correct');
+    disableAll();
+    if(!wrongAnswers.size)correct++;
+    document.getElementById('correct-count').textContent=correct;
+    document.getElementById('btn-next').classList.add('show');
+    const fb=document.getElementById('feedback');
+    fb.className='feedback fb-correct show';
+    fb.innerHTML=`✅ <strong>Correct!</strong><div class="why">💡 ${q.why}</div>`;
+  } else {
+    if(!wrongAnswers.has(idx)){wrongAnswers.add(idx);wrong++;document.getElementById('wrong-count').textContent=wrong;}
+    document.getElementById(`opt-${idx}`).classList.add('wrong');
+    document.getElementById(`opt-${idx}`).disabled=true;
+    const fb=document.getElementById('feedback');
+    const wrongMsg=q.wrongExp&&q.wrongExp[idx]?q.wrongExp[idx]:'That\'s not the right answer. Keep trying!';
+    const totalWrong=q.opts.length-1;
+    if(wrongAnswers.size>=totalWrong){
+      answered=true;
+      document.getElementById(`opt-${q.ans}`).classList.add('reveal');
+      disableAll();
+      document.getElementById('btn-next').classList.add('show');
+      fb.className='feedback show';
+      fb.style.cssText='background:transparent;border:none;padding:0;margin-top:14px';
+      fb.innerHTML=`
+        <div style="background:rgba(240,96,112,0.07);border:1px solid rgba(240,96,112,0.25);border-radius:10px;padding:14px 16px;margin-bottom:10px;font-size:.86rem;line-height:1.75;color:#f0b0b8">❌ ${wrongMsg}</div>
+        <div style="background:rgba(62,207,142,0.08);border:1px solid rgba(62,207,142,0.3);border-radius:10px;padding:14px 16px;font-size:.86rem;line-height:1.75;color:#8de8c0">📌 <strong style="color:#fff">The correct answer is ${letters[q.ans]}. ${q.opts[q.ans]}.</strong><div class="why">💡 ${q.why}</div></div>`;
+    } else {
+      fb.className='feedback fb-wrong show';
+      fb.innerHTML=`❌ ${wrongMsg}<br><span style="font-size:.8rem;color:var(--muted);margin-top:4px;display:block">Keep trying — you still have options left.</span>`;
+    }
+  }
+}
+
+function disableAll(){document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);}
+
+function nextQuestion(){current++;renderQuestion();window.scrollTo({top:0,behavior:'smooth'});}
+
+function showResults(){
+  document.getElementById('question-area').style.display='none';
+  document.getElementById('btn-next').style.display='none';
+  document.querySelector('.progress-wrap').style.display='none';
+  document.querySelector('.score-strip').style.display='none';
+  const total=QUESTIONS.length,pct=Math.round((correct/total)*100);
+  const emoji=pct>=80?'🏆':pct>=60?'👍':'📚';
+  const msg=pct>=80?'Excellent work! Your English is strong.':pct>=60?'Good effort! Keep practicing.':'Keep going — every mistake is a lesson.';
+  document.getElementById('results').innerHTML=`
+    <div class="results-emoji">${emoji}</div>
+    <h2>Quiz Complete!</h2>
+    <p>${msg}</p>
+    <div class="score-big">${pct}%</div>
+    <div class="score-label">Your final score</div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-val g">${correct}</div><div class="stat-lbl">Correct</div></div>
+      <div class="stat"><div class="stat-val r">${wrong}</div><div class="stat-lbl">Wrong</div></div>
+      <div class="stat"><div class="stat-val">${total}</div><div class="stat-lbl">Total</div></div>
+    </div>
+    <button class="btn-restart" onclick="restart()">Try again</button>`;
+  document.getElementById('results').classList.add('show');
+}
+
+function restart(){
+  current=0;correct=0;wrong=0;
+  document.getElementById('question-area').style.display='block';
+  document.querySelector('.progress-wrap').style.display='block';
+  document.querySelector('.score-strip').style.display='flex';
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('btn-next').style.display='';
+  renderQuestion();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
